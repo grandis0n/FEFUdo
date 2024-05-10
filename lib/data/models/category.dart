@@ -6,7 +6,6 @@ class Category {
   DateTime createdAt = DateTime.now();
 
   Category({
-    required this.name,
-    required this.createdAt,
+    required this.name
   });
 }
