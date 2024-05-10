@@ -57,15 +57,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
       body: categories.isNotEmpty
           ? ListView.builder(
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          return CategoryTile(category: category);
-        },
-      )
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories[index];
+                return CategoryCard(category: category);
+              },
+            )
           : const Center(
-        child: Text('Список категорий пуст'),
-      ),
+              child: Text('Список категорий пуст'),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addNewCategory,
         child: const Icon(Icons.add),
@@ -86,6 +86,48 @@ class CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(category.name),
+    );
+  }
+}
+
+class CategoryCard extends StatelessWidget {
+  const CategoryCard({
+    Key? key,
+    required this.category,
+  }) : super(key: key);
+
+  final Category category;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: 100,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const Icon(Icons.chrome_reader_mode),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  category.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
