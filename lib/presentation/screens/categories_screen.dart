@@ -67,6 +67,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 categories.removeAt(index);
               });
             },
+            onEdit: (newName) {
+              setState(() {
+                categories[index].name = newName;
+              });
+            },
           );
         },
       )
@@ -102,44 +107,87 @@ class CategoryCard extends StatelessWidget {
     Key? key,
     required this.category,
     required this.onDismissed,
+    required this.onEdit,
   }) : super(key: key);
 
   final Category category;
   final Function() onDismissed;
+  final Function(String) onEdit;
 
   @override
   Widget build(BuildContext context) {
     return Dismissible(
       key: Key(category.name),
-      direction: DismissDirection.endToStart,
+      direction: DismissDirection.horizontal,
       confirmDismiss: (direction) async {
-        return await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Удалить категорию'),
-              content: Text('Вы уверены, что хотите удалить категорию "${category.name}"?'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Отмена'),
+        if (direction == DismissDirection.startToEnd) {
+          return await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Редактировать категорию'),
+                content: TextField(
+                  onChanged: (newValue) {
+                    onEdit(newValue);
+                  },
+                  controller: TextEditingController(text: category.name),
+                  decoration: InputDecoration(
+                    hintText: 'Новое название категории',
+                  ),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Удалить'),
-                ),
-              ],
-            );
-          },
-        );
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Отмена'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Сохранить'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          return await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Удалить категорию'),
+                content: Text('Вы уверены, что хотите удалить категорию "${category.name}"?'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Отмена'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Удалить'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       },
       onDismissed: (direction) {
-        onDismissed();
+        if (direction == DismissDirection.endToStart) {
+          onDismissed();
+        }
       },
       background: Container(
+        color: Colors.orange,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(right: 20.0),
+        child: const Icon(
+          Icons.edit,
+          color: Colors.white,
+        ),
+      ),
+      secondaryBackground: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20.0),
+        padding: const EdgeInsets.only(left: 20.0),
         child: const Icon(
           Icons.delete,
           color: Colors.white,
