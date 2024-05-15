@@ -57,15 +57,22 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
       body: categories.isNotEmpty
           ? ListView.builder(
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return CategoryCard(category: category);
-              },
-            )
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          return CategoryCard(
+            category: category,
+            onDismissed: () {
+              setState(() {
+                categories.removeAt(index);
+              });
+            },
+          );
+        },
+      )
           : const Center(
-              child: Text('Список категорий пуст'),
-            ),
+        child: Text('Список категорий пуст'),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addNewCategory,
         child: const Icon(Icons.add),
@@ -94,37 +101,76 @@ class CategoryCard extends StatelessWidget {
   const CategoryCard({
     Key? key,
     required this.category,
+    required this.onDismissed,
   }) : super(key: key);
 
   final Category category;
+  final Function() onDismissed;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+    return Dismissible(
+      key: Key(category.name),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Удалить категорию'),
+              content: Text('Вы уверены, что хотите удалить категорию "${category.name}"?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Отмена'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Удалить'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onDismissed: (direction) {
+        onDismissed();
+      },
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20.0),
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+        ),
       ),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: 100,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              const Icon(Icons.chrome_reader_mode),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  category.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+      child: Card(
+        elevation: 4,
+        margin: const EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: 100,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Icon(Icons.chrome_reader_mode),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    category.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
