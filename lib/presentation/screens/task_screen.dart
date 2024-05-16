@@ -12,7 +12,10 @@ class TasksScreen extends StatefulWidget {
 }
 
 class _TasksScreenState extends State<TasksScreen> {
-  List<Task> tasks = [];
+  List<Task> allTasks = [];
+  List<Task> filteredTasks = [];
+
+  String currentFilter = "All";
 
   void _addNewTask() {
     showDialog(
@@ -51,7 +54,7 @@ class _TasksScreenState extends State<TasksScreen> {
                 final description = descriptionController.text.trim();
                 if (title.isNotEmpty) {
                   setState(() {
-                    tasks.add(Task(
+                    allTasks.add(Task(
                       title: title,
                       description: description.isEmpty ? null : description,
                       isCompleted: false,
@@ -59,6 +62,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       categoryId: widget.category.id,
                     ));
                   });
+                  _updateFilteredTasks();
                 }
                 Navigator.pop(context);
               },
@@ -71,18 +75,37 @@ class _TasksScreenState extends State<TasksScreen> {
   }
 
   void _deleteTask(Task task) {
-    // Implement logic to delete task from data source (e.g., database)
-    // Update tasks list in the UI
     setState(() {
-      tasks.remove(task);
+      allTasks.remove(task);
+      _updateFilteredTasks();
     });
   }
 
   void _toggleTaskCompletion(Task task) {
-    // Implement logic to update task completion in data source (e.g., database)
     setState(() {
       task.isCompleted = !task.isCompleted;
+      _updateFilteredTasks();
     });
+  }
+
+  void _toggleFavorite(Task task) {
+    setState(() {
+      task.isFavourite = !task.isFavourite;
+      _updateFilteredTasks();
+    });
+  }
+
+  void _updateFilteredTasks() {
+    filteredTasks.clear();
+    if (currentFilter == "All") {
+      filteredTasks.addAll(allTasks);
+    } else if (currentFilter == "Completed") {
+      filteredTasks.addAll(allTasks.where((task) => task.isCompleted));
+    } else if (currentFilter == "Uncompleted") {
+      filteredTasks.addAll(allTasks.where((task) => !task.isCompleted));
+    } else if (currentFilter == "Favorites") {
+      filteredTasks.addAll(allTasks.where((task) => task.isFavourite));
+    }
   }
 
   @override
@@ -91,27 +114,49 @@ class _TasksScreenState extends State<TasksScreen> {
       appBar: AppBar(
         title: Text(widget.category.name),
         backgroundColor: Colors.blue,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) => setState(() {
+              currentFilter = value;
+              _updateFilteredTasks();
+            }),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: "All",
+                child: Text('Все'),
+              ),
+              const PopupMenuItem(
+                value: "Completed",
+                child: Text('Завершенные'),
+              ),
+              const PopupMenuItem(
+                value: "Uncompleted",
+                child: Text('Незавершенные'),
+              ),
+              const PopupMenuItem(
+                value: "Favorites",
+                child: Text('Избранные'),
+              ),
+            ],
+          ),
+        ],
       ),
-      body: tasks.isNotEmpty
+      body: filteredTasks.isNotEmpty
           ? ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                final task = tasks[index];
-                return TaskCard(
-                  task: task,
-                  onDelete: () => _deleteTask(task),
-                  onToggleCompletion: () => _toggleTaskCompletion(task),
-                  onToggleFavorite: () {
-                    setState(() {
-                      task.isFavourite = !task.isFavourite;
-                    });
-                  },
-                );
-              },
-            )
+        itemCount: filteredTasks.length,
+        itemBuilder: (context, index) {
+          final task = filteredTasks[index];
+          return TaskCard(
+            task: task,
+            onDelete: () => _deleteTask(task),
+            onToggleCompletion: () => _toggleTaskCompletion(task),
+            onToggleFavorite: () => _toggleFavorite(task),
+          );
+        },
+      )
           : const Center(
-              child: Text('Список задач пуст'),
-            ),
+        child: Text('Список задач пуст'),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addNewTask,
         child: const Icon(Icons.add),
