@@ -6,7 +6,6 @@ class Task {
   String? description;
   bool isCompleted;
   bool isFavourite;
-  DateTime createdAt = DateTime.now();
   String categoryId;
 
   Task({
@@ -14,7 +13,6 @@ class Task {
     this.description,
     required this.isCompleted,
     required this.isFavourite,
-    required this.createdAt,
     required this.categoryId,
   });
 }
