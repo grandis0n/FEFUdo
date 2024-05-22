@@ -11,11 +11,13 @@ class TasksScreen extends StatefulWidget {
   State<TasksScreen> createState() => _TasksScreenState();
 }
 
+enum TaskFilter { All, Completed, Uncompleted, Favorites }
+
 class _TasksScreenState extends State<TasksScreen> {
   List<Task> allTasks = [];
   List<Task> filteredTasks = [];
 
-  String currentFilter = "All";
+  TaskFilter currentFilter = TaskFilter.All;
 
   void _addNewTask() {
     showDialog(
@@ -97,14 +99,19 @@ class _TasksScreenState extends State<TasksScreen> {
 
   void _updateFilteredTasks() {
     filteredTasks.clear();
-    if (currentFilter == "All") {
-      filteredTasks.addAll(allTasks);
-    } else if (currentFilter == "Completed") {
-      filteredTasks.addAll(allTasks.where((task) => task.isCompleted));
-    } else if (currentFilter == "Uncompleted") {
-      filteredTasks.addAll(allTasks.where((task) => !task.isCompleted));
-    } else if (currentFilter == "Favorites") {
-      filteredTasks.addAll(allTasks.where((task) => task.isFavourite));
+    switch (currentFilter) {
+      case TaskFilter.All:
+        filteredTasks.addAll(allTasks);
+        break;
+      case TaskFilter.Completed:
+        filteredTasks.addAll(allTasks.where((task) => task.isCompleted));
+        break;
+      case TaskFilter.Uncompleted:
+        filteredTasks.addAll(allTasks.where((task) => !task.isCompleted));
+        break;
+      case TaskFilter.Favorites:
+        filteredTasks.addAll(allTasks.where((task) => task.isFavourite));
+        break;
     }
   }
 
@@ -115,48 +122,50 @@ class _TasksScreenState extends State<TasksScreen> {
         title: Text(widget.category.name),
         backgroundColor: Colors.blue,
         actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) => setState(() {
-              currentFilter = value;
-              _updateFilteredTasks();
-            }),
+          PopupMenuButton<TaskFilter>(
+            onSelected: (TaskFilter value) {
+              setState(() {
+                currentFilter = value;
+                _updateFilteredTasks();
+              });
+            },
             itemBuilder: (context) => [
               const PopupMenuItem(
-                value: "All",
+                value: TaskFilter.All,
                 child: Text('Все'),
               ),
               const PopupMenuItem(
-                value: "Completed",
+                value: TaskFilter.Completed,
                 child: Text('Завершенные'),
               ),
               const PopupMenuItem(
-                value: "Uncompleted",
+                value: TaskFilter.Uncompleted,
                 child: Text('Незавершенные'),
               ),
               const PopupMenuItem(
-                value: "Favorites",
+                value: TaskFilter.Favorites,
                 child: Text('Избранные'),
               ),
             ],
-          ),
+          )
         ],
       ),
       body: filteredTasks.isNotEmpty
           ? ListView.builder(
-        itemCount: filteredTasks.length,
-        itemBuilder: (context, index) {
-          final task = filteredTasks[index];
-          return TaskCard(
-            task: task,
-            onDelete: () => _deleteTask(task),
-            onToggleCompletion: () => _toggleTaskCompletion(task),
-            onToggleFavorite: () => _toggleFavorite(task),
-          );
-        },
-      )
+              itemCount: filteredTasks.length,
+              itemBuilder: (context, index) {
+                final task = filteredTasks[index];
+                return TaskCard(
+                  task: task,
+                  onDelete: () => _deleteTask(task),
+                  onToggleCompletion: () => _toggleTaskCompletion(task),
+                  onToggleFavorite: () => _toggleFavorite(task),
+                );
+              },
+            )
           : const Center(
-        child: Text('Список задач пуст'),
-      ),
+              child: Text('Список задач пуст'),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addNewTask,
         child: const Icon(Icons.add),
@@ -167,9 +176,10 @@ class _TasksScreenState extends State<TasksScreen> {
 
 class TaskCard extends StatelessWidget {
   final Task task;
-  final Function() onDelete;
-  final Function() onToggleFavorite;
-  final Function() onToggleCompletion;
+
+  final VoidCallback onDelete;
+  final VoidCallback onToggleFavorite;
+  final VoidCallback onToggleCompletion;
 
   const TaskCard({
     Key? key,
@@ -204,8 +214,6 @@ class TaskCard extends StatelessWidget {
       onDismissed: (direction) {
         if (direction == DismissDirection.endToStart) {
           onDelete();
-        } else if (direction == DismissDirection.startToEnd) {
-          // for editing
         }
       },
       child: Card(

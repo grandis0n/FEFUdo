@@ -1,7 +1,7 @@
 import 'package:uuid/uuid.dart';
 
 class Task {
-  String id = const Uuid().v4();
+  String id;
   String title;
   String? description;
   bool isCompleted;
@@ -10,9 +10,9 @@ class Task {
 
   Task({
     required this.title,
-    this.description,
-    required this.isCompleted,
-    required this.isFavourite,
+    this.description = '',
+    this.isCompleted = false,
+    this.isFavourite = false,
     required this.categoryId,
-  });
+  }) : id = const Uuid().v4();
 }
