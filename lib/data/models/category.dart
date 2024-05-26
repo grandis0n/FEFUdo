@@ -7,8 +7,6 @@ class Category {
 
   Category({
     required this.name,
-    String? id,
-    DateTime? createdAt,
-  })  : id = id ?? const Uuid().v4(),
-        createdAt = createdAt ?? DateTime.now();
+  })  : id = const Uuid().v4(),
+        createdAt =  DateTime.now();
 }
