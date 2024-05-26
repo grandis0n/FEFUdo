@@ -1,5 +1,6 @@
 import 'package:fefu_do/data/models/category.dart';
 import 'package:fefu_do/data/models/task.dart';
+import 'package:fefu_do/presentation/screens/task_detail_screen.dart';
 import 'package:flutter/material.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -18,6 +19,16 @@ class _TasksScreenState extends State<TasksScreen> {
   List<Task> filteredTasks = [];
 
   TaskFilter currentFilter = TaskFilter.All;
+
+  void _updateTask(Task updatedTask) {
+    setState(() {
+      final index = allTasks.indexWhere((task) => task.id == updatedTask.id);
+      if (index != -1) {
+        allTasks[index] = updatedTask;
+      }
+      _updateFilteredTasks();
+    });
+  }
 
   void _addNewTask() {
     showDialog(
@@ -152,20 +163,21 @@ class _TasksScreenState extends State<TasksScreen> {
       ),
       body: filteredTasks.isNotEmpty
           ? ListView.builder(
-              itemCount: filteredTasks.length,
-              itemBuilder: (context, index) {
-                final task = filteredTasks[index];
-                return TaskCard(
-                  task: task,
-                  onDelete: () => _deleteTask(task),
-                  onToggleCompletion: () => _toggleTaskCompletion(task),
-                  onToggleFavorite: () => _toggleFavorite(task),
-                );
-              },
-            )
+        itemCount: filteredTasks.length,
+        itemBuilder: (context, index) {
+          final task = filteredTasks[index];
+          return TaskCard(
+            task: task,
+            onDelete: () => _deleteTask(task),
+            onToggleCompletion: () => _toggleTaskCompletion(task),
+            onToggleFavorite: () => _toggleFavorite(task),
+            onUpdate: _updateTask,
+          );
+        },
+      )
           : const Center(
-              child: Text('Список задач пуст'),
-            ),
+        child: Text('Список задач пуст'),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addNewTask,
         child: const Icon(Icons.add),
@@ -180,6 +192,7 @@ class TaskCard extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback onToggleFavorite;
   final VoidCallback onToggleCompletion;
+  final Function(Task) onUpdate;
 
   const TaskCard({
     Key? key,
@@ -187,6 +200,7 @@ class TaskCard extends StatelessWidget {
     required this.onDelete,
     required this.onToggleFavorite,
     required this.onToggleCompletion,
+    required this.onUpdate,
   }) : super(key: key);
 
   @override
@@ -216,30 +230,48 @@ class TaskCard extends StatelessWidget {
           onDelete();
         }
       },
-      child: Card(
-        elevation: 4,
-        margin: const EdgeInsets.all(8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Checkbox(
-              value: task.isCompleted,
-              onChanged: (newValue) => onToggleCompletion(),
-            ),
-            Text(task.title),
-            IconButton(
-              icon: Icon(
-                task.isFavourite ? Icons.star : Icons.star_outline,
-                color: task.isFavourite ? Colors.yellow : Colors.grey,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TaskDetailScreen(
+                task: task,
+                onUpdate: onUpdate,
+                onDelete: (task) {
+                  onDelete();
+                  Navigator.pop(context);
+                },
               ),
-              onPressed: onToggleFavorite,
             ),
-          ],
+          );
+        },
+        child: Card(
+          elevation: 4,
+          margin: const EdgeInsets.all(8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Checkbox(
+                value: task.isCompleted,
+                onChanged: (newValue) => onToggleCompletion(),
+              ),
+              Text(task.title),
+              IconButton(
+                icon: Icon(
+                  task.isFavourite ? Icons.star : Icons.star_outline,
+                  color: task.isFavourite ? Colors.yellow : Colors.grey,
+                ),
+                onPressed: onToggleFavorite,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+

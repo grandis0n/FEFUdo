@@ -7,6 +7,7 @@ class Task {
   bool isCompleted;
   bool isFavourite;
   String categoryId;
+  DateTime createdAt;
 
   Task({
     required this.title,
@@ -14,5 +15,11 @@ class Task {
     this.isCompleted = false,
     this.isFavourite = false,
     required this.categoryId,
-  }) : id = const Uuid().v4();
+  })  : id = const Uuid().v4(),
+        createdAt = DateTime.now();
+
+  void update({required String title, String? description}) {
+    this.title = title;
+    this.description = description;
+  }
 }
