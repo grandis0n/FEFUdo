@@ -1,5 +1,6 @@
+// lib/presentation/screens/task_detail_screen.dart
 import 'package:flutter/material.dart';
-import 'package:fefu_do/data/models/task.dart';
+import 'package:fefu_do/domain/entities/task.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
@@ -95,6 +96,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     Navigator.pop(context);
                   },
                   child: const Text('Сохранить'),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                    backgroundColor: Colors.red,
+                  ),
+                  onPressed: () {
+                    widget.onDelete(widget.task);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Удалить'),
                 ),
               ],
             ),

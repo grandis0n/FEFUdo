@@ -1,19 +1,66 @@
-import 'package:fefu_do/presentation/screens/task_screen.dart';
+// lib/presentation/screens/categories_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fefu_do/presentation/blocs/category_bloc.dart';
+import 'package:fefu_do/presentation/widgets/category_card.dart';
+import 'package:fefu_do/domain/entities/category.dart';
+import 'package:uuid/uuid.dart';
 
-import '../../data/models/category.dart';
+import '../blocs/category_event.dart';
+import '../blocs/category_state.dart';
 
-class CategoriesScreen extends StatefulWidget {
+class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({Key? key}) : super(key: key);
 
   @override
-  State<CategoriesScreen> createState() => _CategoriesScreenState();
-}
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('FEFU Todo App'),
+        backgroundColor: Colors.blue,
+      ),
+      body: BlocBuilder<CategoryBloc, CategoryState>(
+        builder: (context, state) {
+          if (state is CategoryLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is CategoryLoaded) {
+            return state.categories.isNotEmpty
+                ? ListView.builder(
+              itemCount: state.categories.length,
+              itemBuilder: (context, index) {
+                final category = state.categories[index];
+                return CategoryCard(
+                  category: category,
+                  onDismissed: () {
+                    context.read<CategoryBloc>().add(DeleteCategoryEvent(category.id));
+                  },
+                  onEdit: (newName) {
+                    final updatedCategory = Category(
+                      id: category.id,
+                      name: newName,
+                      createdAt: category.createdAt,
+                    );
+                    context.read<CategoryBloc>().add(UpdateCategoryEvent(updatedCategory));
+                  },
+                );
+              },
+            )
+                : const Center(child: Text('Список категорий пуст'));
+          } else if (state is CategoryError) {
+            return Center(child: Text(state.message));
+          } else {
+            return const Center(child: Text('Неизвестная ошибка'));
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addNewCategory(context),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 
-class _CategoriesScreenState extends State<CategoriesScreen> {
-  var categories = <Category>[];
-
-  void _addNewCategory() {
+  void _addNewCategory(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -35,9 +82,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               onPressed: () {
                 final name = nameController.text.trim();
                 if (name.isNotEmpty) {
-                  setState(() {
-                    categories.add(Category(name: name));
-                  });
+                  final newCategory = Category(
+                    id: const Uuid().v4(),
+                    name: name,
+                    createdAt: DateTime.now(),
+                  );
+                  context.read<CategoryBloc>().add(AddNewCategory(newCategory));
                 }
                 Navigator.pop(context);
               },
@@ -47,192 +97,5 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         );
       },
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('FEFU Todo App'),
-        backgroundColor: Colors.blue,
-      ),
-      body: categories.isNotEmpty
-          ? ListView.builder(
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return CategoryCard(
-                  category: category,
-                  onDismissed: () {
-                    setState(() {
-                      categories.removeAt(index);
-                    });
-                  },
-                  onEdit: (newName) {
-                    setState(() {
-                      categories[index].name = newName;
-                    });
-                  },
-                );
-              },
-            )
-          : const Center(
-              child: Text('Список категорий пуст'),
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addNewCategory,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-class CategoryTile extends StatelessWidget {
-  const CategoryTile({
-    Key? key,
-    required this.category,
-  }) : super(key: key);
-
-  final Category category;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(category.name),
-    );
-  }
-}
-
-class CategoryCard extends StatelessWidget {
-  const CategoryCard({
-    Key? key,
-    required this.category,
-    required this.onDismissed,
-    required this.onEdit,
-  }) : super(key: key);
-
-  final Category category;
-  final Function() onDismissed;
-  final Function(String) onEdit;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TasksScreen(category: category),
-            ),
-          );
-        },
-        child: Dismissible(
-          key: Key(category.name),
-          direction: DismissDirection.horizontal,
-          confirmDismiss: (direction) async {
-            if (direction == DismissDirection.startToEnd) {
-              return await showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Редактировать категорию'),
-                    content: TextField(
-                      onChanged: (newValue) {
-                        onEdit(newValue);
-                      },
-                      controller: TextEditingController(text: category.name),
-                      decoration: InputDecoration(
-                        hintText: 'Новое название категории',
-                      ),
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Отмена'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('Сохранить'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            } else {
-              return await showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Удалить категорию'),
-                    content: Text(
-                        'Вы уверены, что хотите удалить категорию "${category.name}"?'),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Отмена'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('Удалить'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            }
-          },
-          onDismissed: (direction) {
-            if (direction == DismissDirection.endToStart) {
-              onDismissed();
-            }
-          },
-          background: Container(
-            color: Colors.orange,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(right: 20.0),
-            child: const Icon(
-              Icons.edit,
-              color: Colors.white,
-            ),
-          ),
-          secondaryBackground: Container(
-            color: Colors.red,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(left: 20.0),
-            child: const Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
-          ),
-          child: Card(
-            elevation: 4,
-            margin: const EdgeInsets.all(8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: 100,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    const Icon(Icons.chrome_reader_mode),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        category.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ));
   }
 }
