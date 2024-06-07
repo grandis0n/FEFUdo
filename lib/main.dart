@@ -13,7 +13,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +26,8 @@ class MyApp extends StatelessWidget {
           create: (context) => GetIt.I<TaskBloc>(),
         ),
       ],
-      child: MaterialApp(
-        home: const CategoriesScreen(),
+      child: const MaterialApp(
+        home: CategoriesScreen(),
       ),
     );
   }

@@ -1,4 +1,3 @@
-// lib/presentation/screens/categories_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fefu_do/presentation/blocs/category_bloc.dart';
@@ -10,7 +9,7 @@ import '../blocs/category_event.dart';
 import '../blocs/category_state.dart';
 
 class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen({Key? key}) : super(key: key);
+  const CategoriesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +20,9 @@ class CategoriesScreen extends StatelessWidget {
       ),
       body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
-          if (state is CategoryLoading) {
+          if (state.status == CategoryStatus.loading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is CategoryLoaded) {
+          } else if (state.status == CategoryStatus.loaded) {
             return state.categories.isNotEmpty
                 ? ListView.builder(
               itemCount: state.categories.length,
@@ -46,7 +45,7 @@ class CategoriesScreen extends StatelessWidget {
               },
             )
                 : const Center(child: Text('Список категорий пуст'));
-          } else if (state is CategoryError) {
+          } else if (state.status == CategoryStatus.error) {
             return Center(child: Text(state.message));
           } else {
             return const Center(child: Text('Неизвестная ошибка'));
