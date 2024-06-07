@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fefu_do/presentation/blocs/category_bloc.dart';
+import 'package:fefu_do/presentation/cubits/category_cubit.dart';
 import 'package:fefu_do/presentation/widgets/category_card.dart';
 import 'package:fefu_do/domain/entities/category.dart';
 import 'package:uuid/uuid.dart';
-
-import '../blocs/category_event.dart';
-import '../blocs/category_state.dart';
+import 'package:fefu_do/presentation/cubits/category_state.dart';
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
@@ -18,7 +16,7 @@ class CategoriesScreen extends StatelessWidget {
         title: const Text('FEFU Todo App'),
         backgroundColor: Colors.blue,
       ),
-      body: BlocBuilder<CategoryBloc, CategoryState>(
+      body: BlocBuilder<CategoryCubit, CategoryState>(
         builder: (context, state) {
           if (state.status == CategoryStatus.loading) {
             return const Center(child: CircularProgressIndicator());
@@ -31,7 +29,7 @@ class CategoriesScreen extends StatelessWidget {
                 return CategoryCard(
                   category: category,
                   onDismissed: () {
-                    context.read<CategoryBloc>().add(DeleteCategoryEvent(category.id));
+                    context.read<CategoryCubit>().deleteCategoryById(category.id);
                   },
                   onEdit: (newName) {
                     final updatedCategory = Category(
@@ -39,7 +37,7 @@ class CategoriesScreen extends StatelessWidget {
                       name: newName,
                       createdAt: category.createdAt,
                     );
-                    context.read<CategoryBloc>().add(UpdateCategoryEvent(updatedCategory));
+                    context.read<CategoryCubit>().modifyCategory(updatedCategory);
                   },
                 );
               },
@@ -86,7 +84,7 @@ class CategoriesScreen extends StatelessWidget {
                     name: name,
                     createdAt: DateTime.now(),
                   );
-                  context.read<CategoryBloc>().add(AddNewCategory(newCategory));
+                  context.read<CategoryCubit>().addNewCategory(newCategory);
                 }
                 Navigator.pop(context);
               },

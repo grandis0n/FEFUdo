@@ -1,16 +1,14 @@
-// lib/presentation/screens/tasks_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:fefu_do/domain/entities/category.dart';
 import 'package:fefu_do/domain/entities/task.dart';
 import 'package:fefu_do/domain/entities/task_filter.dart';
-import 'package:fefu_do/presentation/blocs/task_bloc.dart';
+import 'package:fefu_do/presentation/cubits/task_cubit.dart';
 import 'package:fefu_do/presentation/widgets/task_card.dart';
 import 'package:uuid/uuid.dart';
 
-import '../blocs/task_event.dart';
-import '../blocs/task_state.dart';
+import '../cubits/task_state.dart';
 
 class TasksScreen extends StatefulWidget {
   final Category category;
@@ -27,7 +25,7 @@ class _TasksScreenState extends State<TasksScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => GetIt.I<TaskBloc>()..add(LoadTasks(widget.category.id)),
+      create: (context) => GetIt.I<TaskCubit>()..loadTasks(widget.category.id),
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.category.name),
@@ -37,7 +35,7 @@ class _TasksScreenState extends State<TasksScreen> {
               onSelected: (TaskFilter value) {
                 setState(() {
                   currentFilter = value;
-                  context.read<TaskBloc>().add(LoadTasks(widget.category.id));
+                  context.read<TaskCubit>().loadTasks(widget.category.id);
                 });
               },
               itemBuilder: (context) => [
@@ -61,7 +59,7 @@ class _TasksScreenState extends State<TasksScreen> {
             )
           ],
         ),
-        body: BlocBuilder<TaskBloc, TaskState>(
+        body: BlocBuilder<TaskCubit, TaskState>(
           builder: (context, state) {
             if (state is TaskLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -91,18 +89,18 @@ class _TasksScreenState extends State<TasksScreen> {
                   return TaskCard(
                     task: task,
                     onDelete: () {
-                      context.read<TaskBloc>().add(DeleteTaskEvent(task.id));
+                      context.read<TaskCubit>().deleteTaskById(task.id);
                     },
                     onToggleCompletion: () {
                       task.isCompleted = !task.isCompleted;
-                      context.read<TaskBloc>().add(UpdateTaskEvent(task));
+                      context.read<TaskCubit>().modifyTask(task);
                     },
                     onToggleFavorite: () {
                       task.isFavourite = !task.isFavourite;
-                      context.read<TaskBloc>().add(UpdateTaskEvent(task));
+                      context.read<TaskCubit>().modifyTask(task);
                     },
                     onUpdate: (updatedTask) {
-                      context.read<TaskBloc>().add(UpdateTaskEvent(updatedTask));
+                      context.read<TaskCubit>().modifyTask(updatedTask);
                     },
                   );
                 },
@@ -168,7 +166,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     categoryId: widget.category.id,
                     createdAt: DateTime.now(),
                   );
-                  context.read<TaskBloc>().add(AddNewTask(newTask));
+                  context.read<TaskCubit>().addNewTask(newTask);
                   Navigator.pop(context);
                 }
               },

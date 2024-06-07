@@ -1,10 +1,9 @@
-import 'package:fefu_do/presentation/blocs/category_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fefu_do/core/utils/service_locator.dart';
 import 'package:fefu_do/presentation/screens/categories_screen.dart';
-import 'package:fefu_do/presentation/blocs/category_bloc.dart';
-import 'package:fefu_do/presentation/blocs/task_bloc.dart';
+import 'package:fefu_do/presentation/cubits/category_cubit.dart';
+import 'package:fefu_do/presentation/cubits/task_cubit.dart';
 import 'package:get_it/get_it.dart';
 
 void main() {
@@ -19,11 +18,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<CategoryBloc>(
-          create: (context) => GetIt.I<CategoryBloc>()..add(LoadCategories()),
+        BlocProvider<CategoryCubit>(
+          create: (context) => GetIt.I<CategoryCubit>()..loadCategories(),
         ),
-        BlocProvider<TaskBloc>(
-          create: (context) => GetIt.I<TaskBloc>(),
+        BlocProvider<TaskCubit>(
+          create: (context) => GetIt.I<TaskCubit>(),
         ),
       ],
       child: const MaterialApp(

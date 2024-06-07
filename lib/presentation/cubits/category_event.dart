@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:fefu_do/domain/entities/category.dart';
 
-// Category Event
 abstract class CategoryEvent extends Equatable {
   const CategoryEvent();
 
@@ -29,10 +28,10 @@ class DeleteCategoryEvent extends CategoryEvent {
   List<Object> get props => [id];
 }
 
-class UpdateCategoryEvent extends CategoryEvent {
+class ModifyCategoryEvent extends CategoryEvent {
   final Category category;
 
-  const UpdateCategoryEvent(this.category);
+  const ModifyCategoryEvent(this.category);
 
   @override
   List<Object> get props => [category];

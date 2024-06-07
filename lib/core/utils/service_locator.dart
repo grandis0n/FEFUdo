@@ -11,8 +11,8 @@ import 'package:fefu_do/domain/usecases/get_categories.dart';
 import 'package:fefu_do/domain/usecases/get_tasks.dart';
 import 'package:fefu_do/domain/usecases/update_category.dart';
 import 'package:fefu_do/domain/usecases/update_task.dart';
-import 'package:fefu_do/presentation/blocs/category_bloc.dart';
-import 'package:fefu_do/presentation/blocs/task_bloc.dart';
+import 'package:fefu_do/presentation/cubits/category_cubit.dart';
+import 'package:fefu_do/presentation/cubits/task_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -31,15 +31,15 @@ void init() {
   sl.registerLazySingleton(() => UpdateTask(sl()));
   sl.registerLazySingleton(() => UpdateCategory(sl()));
 
-  // Blocs
-  sl.registerFactory(() => CategoryBloc(
+  // Cubits
+  sl.registerFactory(() => CategoryCubit(
     getCategories: sl(),
     addCategory: sl(),
     deleteCategory: sl(),
     updateCategory: sl(),
   ));
 
-  sl.registerFactory(() => TaskBloc(
+  sl.registerFactory(() => TaskCubit(
     getTasks: sl(),
     addTask: sl(),
     updateTask: sl(),
