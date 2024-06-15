@@ -13,13 +13,17 @@ import 'package:fefu_do/domain/usecases/update_category.dart';
 import 'package:fefu_do/domain/usecases/update_task.dart';
 import 'package:fefu_do/presentation/cubits/category_cubit.dart';
 import 'package:fefu_do/presentation/cubits/task_cubit.dart';
+import 'package:fefu_do/data/database.dart';
 
 final sl = GetIt.instance;
 
 void init() {
+  // Database
+  sl.registerLazySingleton<AppDatabase>(() => AppDatabase());
+
   // Repositories
-  sl.registerLazySingleton<CategoryRepository>(() => CategoryRepositoryImpl());
-  sl.registerLazySingleton<TaskRepository>(() => TaskRepositoryImpl());
+  sl.registerLazySingleton<CategoryRepository>(() => CategoryRepositoryImpl(sl()));
+  sl.registerLazySingleton<TaskRepository>(() => TaskRepositoryImpl(sl()));
 
   // UseCases
   sl.registerLazySingleton(() => AddCategory(sl()));
