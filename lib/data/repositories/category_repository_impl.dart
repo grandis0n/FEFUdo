@@ -3,14 +3,17 @@ import 'package:fefu_do/data/database.dart' as db;
 import 'package:fefu_do/domain/entities/category.dart';
 import 'package:fefu_do/domain/repositories/category_repository.dart';
 
-class CategoryRepositoryImpl implements CategoryRepository {
-  final db.AppDatabase database;
+import '../datasources/category_local_data_source.dart';
 
-  CategoryRepositoryImpl(this.database);
+
+class CategoryRepositoryImpl implements CategoryRepository {
+  final CategoryLocalDataSource localDataSource;
+
+  CategoryRepositoryImpl(this.localDataSource);
 
   @override
   Future<List<Category>> getCategories() async {
-    final categories = await database.getAllCategories();
+    final categories = await localDataSource.getAllCategories();
     return categories.map((e) => Category(
       id: e.id,
       name: e.name,
@@ -25,12 +28,12 @@ class CategoryRepositoryImpl implements CategoryRepository {
       name: Value(category.name),
       createdAt: Value(category.createdAt),
     );
-    await database.insertCategory(categoryCompanion);
+    await localDataSource.insertCategory(categoryCompanion);
   }
 
   @override
   Future<void> deleteCategory(String id) async {
-    await database.deleteCategory(id);
+    await localDataSource.deleteCategory(id);
   }
 
   @override
@@ -40,6 +43,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
       name: Value(category.name),
       createdAt: Value(category.createdAt),
     );
-    await database.updateCategory(categoryCompanion);
+    await localDataSource.updateCategory(categoryCompanion);
   }
 }

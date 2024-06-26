@@ -1,4 +1,6 @@
 import 'package:get_it/get_it.dart';
+import 'package:fefu_do/data/datasources/category_local_data_source.dart';
+import 'package:fefu_do/data/datasources/task_local_data_source.dart';
 import 'package:fefu_do/data/repositories/category_repository_impl.dart';
 import 'package:fefu_do/data/repositories/task_repository_impl.dart';
 import 'package:fefu_do/domain/repositories/category_repository.dart';
@@ -20,6 +22,10 @@ final sl = GetIt.instance;
 void init() {
   // Database
   sl.registerLazySingleton<AppDatabase>(() => AppDatabase());
+
+  // Data Sources
+  sl.registerLazySingleton<CategoryLocalDataSource>(() => CategoryLocalDataSource(sl()));
+  sl.registerLazySingleton<TaskLocalDataSource>(() => TaskLocalDataSource(sl()));
 
   // Repositories
   sl.registerLazySingleton<CategoryRepository>(() => CategoryRepositoryImpl(sl()));

@@ -3,14 +3,16 @@ import 'package:fefu_do/data/database.dart' as db;
 import 'package:fefu_do/domain/entities/task.dart';
 import 'package:fefu_do/domain/repositories/task_repository.dart';
 
-class TaskRepositoryImpl implements TaskRepository {
-  final db.AppDatabase database;
+import '../datasources/task_local_data_source.dart';
 
-  TaskRepositoryImpl(this.database);
+class TaskRepositoryImpl implements TaskRepository {
+  final TaskLocalDataSource localDataSource;
+
+  TaskRepositoryImpl(this.localDataSource);
 
   @override
   Future<List<Task>> getTasks(String categoryId) async {
-    final tasks = await database.getTasksByCategoryId(categoryId);
+    final tasks = await localDataSource.getTasksByCategoryId(categoryId);
     return tasks.map((e) => Task(
       id: e.id,
       title: e.title,
@@ -33,12 +35,12 @@ class TaskRepositoryImpl implements TaskRepository {
       categoryId: Value(task.categoryId),
       createdAt: Value(task.createdAt),
     );
-    await database.insertTask(taskCompanion);
+    await localDataSource.insertTask(taskCompanion);
   }
 
   @override
   Future<void> deleteTask(String id) async {
-    await database.deleteTask(id);
+    await localDataSource.deleteTask(id);
   }
 
   @override
@@ -52,6 +54,6 @@ class TaskRepositoryImpl implements TaskRepository {
       categoryId: Value(task.categoryId),
       createdAt: Value(task.createdAt),
     );
-    await database.updateTask(taskCompanion);
+    await localDataSource.updateTask(taskCompanion);
   }
 }
