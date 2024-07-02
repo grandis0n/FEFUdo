@@ -6,6 +6,7 @@ class Task {
   bool isFavourite;
   final String categoryId;
   final DateTime createdAt;
+  String? imageUrl;
 
   Task({
     required this.id,
@@ -15,10 +16,16 @@ class Task {
     required this.isFavourite,
     required this.categoryId,
     required this.createdAt,
+    this.imageUrl,
   });
 
-  void update({required String title, String? description}) {
+  void update({
+    required String title,
+    String? description,
+    String? imageUrl,
+  }) {
     this.title = title;
     this.description = description;
+    this.imageUrl = imageUrl ?? this.imageUrl;
   }
 }

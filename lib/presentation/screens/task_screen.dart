@@ -1,13 +1,14 @@
+// lib/presentation/screens/task_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:fefu_do/domain/entities/category.dart';
 import 'package:fefu_do/domain/entities/task.dart';
-import 'package:fefu_do/domain/entities/task_filter.dart';
 import 'package:fefu_do/presentation/cubits/task_cubit.dart';
 import 'package:fefu_do/presentation/widgets/task_card.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../domain/entities/task_filter.dart';
 import '../cubits/task_state.dart';
 
 class TasksScreen extends StatefulWidget {

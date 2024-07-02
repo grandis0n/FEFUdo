@@ -21,6 +21,7 @@ class TaskRepositoryImpl implements TaskRepository {
       isFavourite: e.isFavourite,
       categoryId: e.categoryId,
       createdAt: e.createdAt,
+      imageUrl: e.imageUrl,
     )).toList();
   }
 
@@ -34,6 +35,7 @@ class TaskRepositoryImpl implements TaskRepository {
       isFavourite: Value(task.isFavourite),
       categoryId: Value(task.categoryId),
       createdAt: Value(task.createdAt),
+      imageUrl: Value(task.imageUrl),
     );
     await localDataSource.insertTask(taskCompanion);
   }
@@ -53,6 +55,7 @@ class TaskRepositoryImpl implements TaskRepository {
       isFavourite: Value(task.isFavourite),
       categoryId: Value(task.categoryId),
       createdAt: Value(task.createdAt),
+      imageUrl: Value(task.imageUrl),
     );
     await localDataSource.updateTask(taskCompanion);
   }
