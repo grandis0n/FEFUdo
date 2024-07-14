@@ -1,4 +1,3 @@
-// lib/presentation/screens/task_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -93,15 +92,10 @@ class _TasksScreenState extends State<TasksScreen> {
                       context.read<TaskCubit>().deleteTaskById(task.id);
                     },
                     onToggleCompletion: () {
-                      task.isCompleted = !task.isCompleted;
-                      context.read<TaskCubit>().modifyTask(task);
+                      context.read<TaskCubit>().modifyTask(task.copyWith(isCompleted: !task.isCompleted));
                     },
                     onToggleFavorite: () {
-                      task.isFavourite = !task.isFavourite;
-                      context.read<TaskCubit>().modifyTask(task);
-                    },
-                    onUpdate: (updatedTask) {
-                      context.read<TaskCubit>().modifyTask(updatedTask);
+                      context.read<TaskCubit>().modifyTask(task.copyWith(isFavourite: !task.isFavourite));
                     },
                   );
                 },

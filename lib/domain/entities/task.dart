@@ -1,12 +1,12 @@
 class Task {
   final String id;
-  String title;
-  String? description;
-  bool isCompleted;
-  bool isFavourite;
+  final String title;
+  final String? description;
+  final bool isCompleted;
+  final bool isFavourite;
   final String categoryId;
   final DateTime createdAt;
-  String? imageUrl;
+  final String? imageUrl;
 
   Task({
     required this.id,
@@ -19,13 +19,22 @@ class Task {
     this.imageUrl,
   });
 
-  void update({
-    required String title,
+  Task copyWith({
+    String? title,
     String? description,
+    bool? isCompleted,
+    bool? isFavourite,
     String? imageUrl,
   }) {
-    this.title = title;
-    this.description = description;
-    this.imageUrl = imageUrl ?? this.imageUrl;
+    return Task(
+      id: this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      isCompleted: isCompleted ?? this.isCompleted,
+      isFavourite: isFavourite ?? this.isFavourite,
+      categoryId: this.categoryId,
+      createdAt: this.createdAt,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
   }
 }
