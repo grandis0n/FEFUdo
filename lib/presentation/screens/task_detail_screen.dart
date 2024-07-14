@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fefu_do/domain/entities/task.dart';
 import 'package:fefu_do/presentation/cubits/task_cubit.dart';
 import 'package:fefu_do/presentation/cubits/task_state.dart';
+import 'package:fefu_do/data/datasources/flickr_service.dart';
 import 'package:get_it/get_it.dart';
+
+import '../cubits/image_cubit.dart';
 
 class TaskDetailScreen extends StatelessWidget {
   final Task task;
@@ -27,10 +30,13 @@ class TaskDetailScreen extends StatelessWidget {
         ),
         title: Text(task.title),
       ),
-      body: BlocProvider(
-        create: (context) => GetIt.I<TaskCubit>(),
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (context) => GetIt.I<TaskCubit>()),
+          BlocProvider(create: (context) => ImageCubit(GetIt.I<FlickrService>())..fetchImages('nature', 1)),
+        ],
         child: BlocBuilder<TaskCubit, TaskState>(
-          builder: (context, state) {
+          builder: (context, taskState) {
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -101,6 +107,39 @@ class TaskDetailScreen extends StatelessWidget {
                         Navigator.pop(context);
                       },
                       child: const Text('Удалить'),
+                    ),
+                    const SizedBox(height: 16),
+                    BlocBuilder<ImageCubit, ImageState>(
+                      builder: (context, imageState) {
+                        if (imageState is ImageLoading) {
+                          return CircularProgressIndicator();
+                        } else if (imageState is ImageLoaded) {
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 1,
+                            ),
+                            itemCount: imageState.images.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  context.read<TaskCubit>().modifyTask(task.copyWith(imageUrl: imageState.images[index]));
+                                },
+                                child: Image.network(imageState.images[index]),
+                              );
+                            },
+                          );
+                        } else if (imageState is ImageError) {
+                          return Text('Ошибка: ${imageState.message}');
+                        }
+                        return Container();
+                      },
+                    ),
+                    TextButton(
+                      onPressed: () => context.read<ImageCubit>().fetchImages('nature', 1),
+                      child: const Text('Загрузить ещё'),
                     ),
                   ],
                 ),
