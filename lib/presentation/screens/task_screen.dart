@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:fefu_do/domain/entities/category.dart';
 import 'package:fefu_do/domain/entities/task.dart';
-import 'package:fefu_do/domain/entities/task_filter.dart';
 import 'package:fefu_do/presentation/cubits/task_cubit.dart';
 import 'package:fefu_do/presentation/widgets/task_card.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../domain/entities/task_filter.dart';
 import '../cubits/task_state.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -92,15 +92,10 @@ class _TasksScreenState extends State<TasksScreen> {
                       context.read<TaskCubit>().deleteTaskById(task.id);
                     },
                     onToggleCompletion: () {
-                      task.isCompleted = !task.isCompleted;
-                      context.read<TaskCubit>().modifyTask(task);
+                      context.read<TaskCubit>().modifyTask(task.copyWith(isCompleted: !task.isCompleted));
                     },
                     onToggleFavorite: () {
-                      task.isFavourite = !task.isFavourite;
-                      context.read<TaskCubit>().modifyTask(task);
-                    },
-                    onUpdate: (updatedTask) {
-                      context.read<TaskCubit>().modifyTask(updatedTask);
+                      context.read<TaskCubit>().modifyTask(task.copyWith(isFavourite: !task.isFavourite));
                     },
                   );
                 },

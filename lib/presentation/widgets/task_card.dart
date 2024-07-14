@@ -8,7 +8,6 @@ class TaskCard extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback onToggleFavorite;
   final VoidCallback onToggleCompletion;
-  final Function(Task) onUpdate;
 
   const TaskCard({
     Key? key,
@@ -16,7 +15,6 @@ class TaskCard extends StatelessWidget {
     required this.onDelete,
     required this.onToggleFavorite,
     required this.onToggleCompletion,
-    required this.onUpdate,
   }) : super(key: key);
 
   @override
@@ -53,11 +51,6 @@ class TaskCard extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => TaskDetailScreen(
                 task: task,
-                onUpdate: onUpdate,
-                onDelete: (task) {
-                  onDelete();
-                  Navigator.pop(context);
-                },
               ),
             ),
           );

@@ -16,6 +16,8 @@ import 'package:fefu_do/domain/usecases/update_task.dart';
 import 'package:fefu_do/presentation/cubits/category_cubit.dart';
 import 'package:fefu_do/presentation/cubits/task_cubit.dart';
 import 'package:fefu_do/data/database.dart';
+import '../../data/datasources/flickr_service.dart';
+import '../../presentation/cubits/image_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -55,4 +57,10 @@ void init() {
     updateTask: sl(),
     deleteTask: sl(),
   ));
+
+  // Services
+  sl.registerLazySingleton<FlickrService>(() => FlickrService());
+
+  // ImageCubit
+  sl.registerFactory(() => ImageCubit(sl<FlickrService>()));
 }
